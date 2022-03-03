@@ -150,20 +150,20 @@ export TEXTINPUTADDEXTRASYMBOLS="Y"    # enables additional symbols for interact
 Interactive input mode is also enabled by command line option `"textinput"`
 
 #### Preset Text Input
-Text Entry preset mode is enabled by `TEXTINPUTPRESET` environment variable whereby a name preset can be easily entered whenever a game displays a text prompt. When Text Entry is triggered with `START+Y`, the preset text is entered as a series of key strokes.
+Text Entry preset mode is enabled by `TEXTINPUTPRESET` environment variable whereby a name preset can be easily entered whenever a game displays a text prompt. When Text Entry is triggered with `START+D-PAD LEFT`, the preset text is entered as a series of key strokes.
 
 Text Entry preset mode also assigns `START+A` to send `ENTER`.
 
 CONTROLS
-`START+Y` to send preset
-`START+A` to send `ENTER`
+`START+D-PAD LEFT` to send preset
+`START+D-PAD RIGHT` to send `ENTER`
 
 #### Interactive Text Input
-Interactive Text Entry mode is enabled by launching GPtoKEYB with command line option `"textinput"` or by environment variable `TEXTINPUTINTERACTIVE="Y"` , and is triggered with `START+X`. Once activated, Interactive Text Entry mode works similarly to entering initials for game highscores, with `D-PAD UP/DOWN` switching between letters for the currently selected character, `D-PAD RIGHT` moving to next character, `D-PAD LEFT` deleting and moving back one character, `SELECT/HOTKEY` cancelling interactive text entry, and `START` to confirm and exit interactive text entry. `A` sends `ENTER KEY` in interactive text entry mode and exits interactive text entry.
+Interactive Text Entry mode is enabled by launching GPtoKEYB with command line option `"textinput"` or by environment variable `TEXTINPUTINTERACTIVE="Y"` , and is triggered with `START+D-PAD DOWN`. Once activated, Interactive Text Entry mode works similarly to entering initials for game highscores, with `D-PAD UP/DOWN` switching between letters for the currently selected character, `D-PAD RIGHT` moving to next character, `D-PAD LEFT` deleting and moving back one character, `SELECT/HOTKEY` cancelling interactive text entry, and `START` to confirm and exit interactive text entry. `A` sends `ENTER KEY` in interactive text entry mode and exits interactive text entry.
 
 ##### Interactive Input Mode Controls
 ```
-START+X to activate
+START+D-PAD DOWN to activate
 once activated
 D-PAD UP = previous letter
 D-PAD DOWN = next letter
