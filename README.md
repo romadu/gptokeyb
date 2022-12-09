@@ -6,6 +6,8 @@ Based on code by: [Kris Henriksen](https://github.com/krishenriksen/AnberPorts/t
 Modified to use SDL2 by: [Nikolai Wuttke](https://github.com/lethal-guitar) & [Shanti Gilbert](https://github.com/shantigilbert) for https://github.com/EmuELEC/EmuELEC
 Interactive text entry added by [Robin Duxfield](https://github.com/romadu)
 
+List of keycodes: https://github.com/romadu/gptokeyb/gptokeyb.cpp#L288
+
 ## Build
 `make all`
 
