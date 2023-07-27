@@ -24,6 +24,7 @@
 * 
 * Modified (badly) by: Shanti Gilbert for EmuELEC
 * Modified further by: Nikolai Wuttke for EmuELEC (Added support for SDL and the SDLGameControllerdb.txt)
+* Modified further by: Robin Duxfield (Added interactive text input modes, hotkey+button key assignment support, key repeat and cycling through key sets on specified button(s))
 * 
 * Any help improving this code would be greatly appreciated! 
 * 
@@ -186,31 +187,61 @@ struct
   short guide = KEY_ENTER;
   bool guide_repeat = false;
   short guide_modifier = 0;
-  short a = KEY_X;
-  short a_hk = KEY_ENTER;
+  short a[12] = {KEY_X};
+  short a_hk[12] = {KEY_ENTER};
   bool a_repeat = false;
-  short a_modifier = 0;
-  short a_hk_modifier = 0;
-  short b = KEY_Z;
-  short b_hk = KEY_ESC;
+  short a_modifier[12] = {0};
+  short a_hk_modifier[12] = {0};
+  bool a_cycle = false;
+  int a_current_key = -1;
+  int a_total_keys = 0;
+  bool a_hk_cycle = false;
+  int a_hk_current_key = -1;
+  int a_hk_total_keys = 0;
+  short b[12] = {KEY_Z};
+  short b_hk[12] = {KEY_ESC};
   bool b_repeat = false;
-  short b_modifier = 0;
-  short b_hk_modifier = 0;
-  short x = KEY_C;
-  short x_hk = KEY_C;
+  short b_modifier[12] = {0};
+  short b_hk_modifier[12] = {0};
+  bool b_cycle = false;
+  int b_current_key = -1;
+  int b_total_keys = 0;
+  bool b_hk_cycle = false;
+  int b_hk_current_key = -1;
+  int b_hk_total_keys = 0;
+  short x[12] = {KEY_C};
+  short x_hk[12] = {KEY_C};
   bool x_repeat = false;
-  short x_modifier = 0;
-  short x_hk_modifier = 0;
-  short y = KEY_A;
-  short y_hk = KEY_A;
+  short x_modifier[12] = {0};
+  short x_hk_modifier[12] = {0};
+  bool x_cycle = false;
+  int x_current_key = -1;
+  int x_total_keys = 0;
+  bool x_hk_cycle = false;
+  int x_hk_current_key = -1;
+  int x_hk_total_keys = 0;
+  short y[12] = {KEY_A};
+  short y_hk[12] = {KEY_A};
   bool y_repeat = false;
-  short y_modifier = 0;
-  short y_hk_modifier = 0;
-  short l1 = KEY_RIGHTSHIFT;
-  short l1_hk = KEY_ESC;
+  short y_modifier[12] = {0};
+  short y_hk_modifier[12] = {0};
+  bool y_cycle = false;
+  int y_current_key = -1;
+  int y_total_keys = 0;
+  bool y_hk_cycle = false;
+  int y_hk_current_key = -1;
+  int y_hk_total_keys = 0;
+  short l1[12] = {KEY_RIGHTSHIFT};
+  short l1_hk[12] = {KEY_ESC};
   bool l1_repeat = false;
-  short l1_modifier = 0;
-  short l1_hk_modifier = 0;
+  short l1_modifier[12] = {0};
+  short l1_hk_modifier[12] = {0};
+  bool l1_cycle = false;
+  int l1_current_key = -1;
+  int l1_total_keys = 0;
+  bool l1_hk_cycle = false;
+  int l1_hk_current_key = -1;
+  int l1_hk_total_keys = 0;
   short l2 = KEY_HOME;
   short l2_hk = KEY_HOME;
   bool l2_repeat = false;
@@ -219,11 +250,17 @@ struct
   short l3 = BTN_LEFT;
   bool l3_repeat = false;
   short l3_modifier = 0;
-  short r1 = KEY_LEFTSHIFT;
-  short r1_hk = KEY_ENTER;
+  short r1[12] = {KEY_LEFTSHIFT};
+  short r1_hk[12] = {KEY_ENTER};
   bool r1_repeat = false;
-  short r1_modifier = 0;
-  short r1_hk_modifier = 0;
+  short r1_modifier[12] = {0};
+  short r1_hk_modifier[12] = {0};
+  bool r1_cycle = false;
+  int r1_current_key = -1;
+  int r1_total_keys = 0;
+  bool r1_hk_cycle = false;
+  int r1_hk_current_key = -1;
+  int r1_hk_total_keys = 0;
   short r2 = KEY_END;
   short r2_hk = KEY_END;
   bool r2_repeat = false;
@@ -447,6 +484,10 @@ short char_to_keycode(const char* str)
     keycode = KEY_F9;
   else if (strcmp(str, "f10") == 0)
     keycode = KEY_F10;
+  else if (strcmp(str, "f11") == 0)
+    keycode = KEY_F11;
+  else if (strcmp(str, "f12") == 0)
+    keycode = KEY_F12;
 
   else if (strcmp(str, "@") == 0)
     keycode = KEY_2; // with SHIFT
@@ -778,111 +819,211 @@ void readConfigFile(const char* config_file)
         if (strcmp(co.value, "repeat") == 0) {
             config.a_repeat = true;
         } else if (strcmp(co.value, "add_alt") == 0) {
-            config.a_modifier = KEY_LEFTALT;
+            config.a_modifier[config.a_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.a_modifier = KEY_LEFTCTRL;
+            config.a_modifier[config.a_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.a_modifier = KEY_LEFTSHIFT;
+            config.a_modifier[config.a_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.a = char_to_keycode(co.value);
+            config.a_current_key++;
+            config.a_total_keys++;
+            if (config.a_total_keys > 1) {
+                config.a_cycle = true;
+				config.a_total_keys = std::min(config.a_total_keys,12);
+			}
+            if (config.a_current_key < config.a_total_keys) {
+				config.a[config.a_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("A button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "a_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
-            config.a_hk_modifier = KEY_LEFTALT;
+            config.a_hk_modifier[config.a_hk_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.a_hk_modifier = KEY_LEFTCTRL;
+            config.a_hk_modifier[config.a_hk_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.a_hk_modifier = KEY_LEFTSHIFT;
+            config.a_hk_modifier[config.a_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.a_hk = char_to_keycode(co.value);
+            config.a_hk_current_key++;
+            config.a_hk_total_keys++;
+            if (config.a_hk_total_keys > 1) {
+                config.a_hk_cycle = true;
+				config.a_hk_total_keys = std::min(config.a_hk_total_keys,12);
+			}
+            if (config.a_hk_current_key < config.a_hk_total_keys) {
+				config.a_hk[config.a_hk_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("A + hotkey button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "b") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
             config.b_repeat = true;
         } else if (strcmp(co.value, "add_alt") == 0) {
-            config.b_modifier = KEY_LEFTALT;
+            config.b_modifier[config.b_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.b_modifier = KEY_LEFTCTRL;
+            config.b_modifier[config.b_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.b_modifier = KEY_LEFTSHIFT;
+            config.b_modifier[config.b_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.b = char_to_keycode(co.value);
+            config.b_current_key++;
+            config.b_total_keys++;
+            if (config.b_total_keys > 1) {
+                config.b_cycle = true;
+				config.b_total_keys = std::min(config.b_total_keys,12);
+			}
+            if (config.b_current_key < config.b_total_keys) {
+				config.b[config.b_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("B button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "b_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
-            config.b_hk_modifier = KEY_LEFTALT;
+            config.b_hk_modifier[config.b_hk_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.b_hk_modifier = KEY_LEFTCTRL;
+            config.b_hk_modifier[config.b_hk_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.b_hk_modifier = KEY_LEFTSHIFT;
+            config.b_hk_modifier[config.b_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.b_hk = char_to_keycode(co.value);
+            config.b_hk_current_key++;
+            config.b_hk_total_keys++;
+            if (config.b_hk_total_keys > 1) {
+                config.b_hk_cycle = true;
+				config.b_hk_total_keys = std::min(config.b_hk_total_keys,12);
+			}
+            if (config.b_hk_current_key < config.b_hk_total_keys) {
+				config.b_hk[config.b_hk_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("B + hotkey button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "x") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
             config.x_repeat = true;
         } else if (strcmp(co.value, "add_alt") == 0) {
-            config.x_modifier = KEY_LEFTALT;
+            config.x_modifier[config.x_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.x_modifier = KEY_LEFTCTRL;
+            config.x_modifier[config.x_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.x_modifier = KEY_LEFTSHIFT;
+            config.x_modifier[config.x_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.x = char_to_keycode(co.value);
+            config.x_current_key++;
+            config.x_total_keys++;
+            if (config.x_total_keys > 1) {
+                config.x_cycle = true;
+				config.x_total_keys = std::min(config.x_total_keys,12);
+            }
+            if (config.x_current_key < config.x_total_keys) {
+			    config.x[config.x_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("X button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "x_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
-            config.x_hk_modifier = KEY_LEFTALT;
+            config.x_hk_modifier[config.x_hk_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.x_hk_modifier = KEY_LEFTCTRL;
+            config.x_hk_modifier[config.x_hk_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.x_hk_modifier = KEY_LEFTSHIFT;
+            config.x_hk_modifier[config.x_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.x_hk = char_to_keycode(co.value);
+            config.x_hk_current_key++;
+            config.x_hk_total_keys++;
+            if (config.x_hk_total_keys > 1) {
+                config.x_hk_cycle = true;
+				config.x_hk_total_keys = std::min(config.x_hk_total_keys,12);
+           }
+            if (config.x_hk_current_key < config.x_hk_total_keys) {
+				config.x_hk[config.x_hk_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("X + hotkey button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "y") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
             config.y_repeat = true;
         } else if (strcmp(co.value, "add_alt") == 0) {
-            config.y_modifier = KEY_LEFTALT;
+            config.y_modifier[config.y_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.y_modifier = KEY_LEFTCTRL;
+            config.y_modifier[config.y_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.y_modifier = KEY_LEFTSHIFT;
+            config.y_modifier[config.y_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.y = char_to_keycode(co.value);
+            config.y_current_key++;
+            config.y_total_keys++;
+            if (config.y_total_keys > 1) {
+                config.y_cycle = true;
+				config.y_total_keys = std::min(config.y_total_keys,12);
+            }
+            if (config.y_current_key < config.y_total_keys) {
+				config.y[config.y_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("Y button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "y_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
-            config.y_hk_modifier = KEY_LEFTALT;
+            config.y_hk_modifier[config.y_hk_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.y_hk_modifier = KEY_LEFTCTRL;
+            config.y_hk_modifier[config.y_hk_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.y_hk_modifier = KEY_LEFTSHIFT;
+            config.y_hk_modifier[config.y_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.y_hk = char_to_keycode(co.value);
+            config.y_hk_current_key++;
+            config.y_hk_total_keys++;
+            if (config.y_hk_total_keys > 1) {
+                config.y_hk_cycle = true;
+				config.y_hk_total_keys = std::min(config.y_hk_total_keys,12);
+            }
+            if (config.y_hk_current_key < config.y_hk_total_keys) {
+				config.y_hk[config.y_hk_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("Y + hotkey button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "l1") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
             config.l1_repeat = true;
         } else if (strcmp(co.value, "add_alt") == 0) {
-            config.l1_modifier = KEY_LEFTALT;
+            config.l1_modifier[config.l1_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.l1_modifier = KEY_LEFTCTRL;
+            config.l1_modifier[config.l1_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.l1_modifier = KEY_LEFTSHIFT;
+            config.l1_modifier[config.l1_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.l1 = char_to_keycode(co.value);
+            config.l1_current_key++;
+            config.l1_total_keys++;
+            if (config.l1_total_keys > 1) {
+                config.l1_cycle = true;
+				config.l1_total_keys = std::min(config.l1_total_keys,12);
+            }
+            if (config.l1_current_key < config.l1_total_keys) {
+				config.l1[config.l1_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("L1 button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "l1_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
-            config.l1_hk_modifier = KEY_LEFTALT;
+            config.l1_hk_modifier[config.l1_hk_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.l1_hk_modifier = KEY_LEFTCTRL;
+            config.l1_hk_modifier[config.l1_hk_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.l1_hk_modifier = KEY_LEFTSHIFT;
+            config.l1_hk_modifier[config.l1_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.l1_hk = char_to_keycode(co.value);
+            config.l1_hk_current_key++;
+            config.l1_hk_total_keys++;
+            if (config.l1_hk_total_keys > 1) {
+                config.l1_hk_cycle = true;
+				config.l1_hk_total_keys = std::min(config.l1_hk_total_keys,12);
+            }
+            if (config.l1_hk_current_key < config.l1_hk_total_keys) {
+				config.l1_hk[config.l1_hk_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("L1 + hotkey button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "l2") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
@@ -922,23 +1063,43 @@ void readConfigFile(const char* config_file)
         if (strcmp(co.value, "repeat") == 0) {
             config.r1_repeat = true;
         } else if (strcmp(co.value, "add_alt") == 0) {
-            config.r1_modifier = KEY_LEFTALT;
+            config.r1_modifier[config.r1_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.r1_modifier = KEY_LEFTCTRL;
+            config.r1_modifier[config.r1_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.r1_modifier = KEY_LEFTSHIFT;
+            config.r1_modifier[config.r1_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.r1 = char_to_keycode(co.value);
+            config.r1_current_key++;
+            config.r1_total_keys++;
+            if (config.r1_total_keys > 1) {
+                config.r1_cycle = true;
+				config.r1_total_keys = std::min(config.r1_total_keys,12);
+            }
+            if (config.r1_current_key < config.r1_total_keys) {
+				config.r1[config.r1_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("R1 button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "r1_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
-            config.r1_hk_modifier = KEY_LEFTALT;
+            config.r1_hk_modifier[config.r1_hk_current_key] = KEY_LEFTALT;
         } else if (strcmp(co.value, "add_ctrl") == 0) {
-            config.r1_hk_modifier = KEY_LEFTCTRL;
+            config.r1_hk_modifier[config.r1_hk_current_key] = KEY_LEFTCTRL;
         } else if (strcmp(co.value, "add_shift") == 0) {
-            config.r1_hk_modifier = KEY_LEFTSHIFT;
+            config.r1_hk_modifier[config.r1_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.r1_hk = char_to_keycode(co.value);
+            config.r1_hk_current_key++;
+            config.r1_hk_total_keys++;
+            if (config.r1_hk_total_keys > 1) {
+                config.r1_hk_cycle = true;
+				config.r1_hk_total_keys = std::min(config.r1_hk_total_keys,12);
+            }
+            if (config.r1_hk_current_key < config.r1_hk_total_keys) {
+				config.r1_hk[config.r1_hk_current_key] = char_to_keycode(co.value);
+			} else {
+				printf("R1 + hotkey button has too many key assignments\n");
+			}
         }
     } else if (strcmp(co.key, "r2") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
@@ -1711,7 +1872,7 @@ bool handleEvent(const SDL_Event& event)
 
           case SDL_CONTROLLER_BUTTON_A:
             if (state.hotkey_pressed) {
-              emitKey(config.a_hk, is_pressed, config.a_hk_modifier);
+              emitKey(config.a_hk[config.a_hk_current_key], is_pressed, config.a_hk_modifier[config.a_hk_current_key]);
               if (is_pressed) { //keep track of combo button press so it can be released if hotkey is released before this button is released
                 state.a_hk_was_pressed = true;
                 state.hotkey_combo_triggered = true;
@@ -1719,39 +1880,71 @@ bool handleEvent(const SDL_Event& event)
                 state.a_hk_was_pressed = false;
               }
             } else if (state.a_hk_was_pressed && !(is_pressed)) {
-              emitKey(config.a_hk, is_pressed, config.a_hk_modifier);              
+              emitKey(config.a_hk[config.a_hk_current_key], is_pressed, config.a_hk_modifier[config.a_hk_current_key]);              
               state.a_hk_was_pressed = false;
+              if (config.a_hk_cycle) {
+                  config.a_hk_current_key++;
+                  if (config.a_hk_current_key >= config.a_hk_total_keys) {
+                      config.a_hk_current_key = 0;
+                  }
+              } else {
+				  config.a_hk_total_keys = 1;
+			  }
             } else {
-              emitKey(config.a, is_pressed, config.a_modifier);
-              if ((config.a_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.a))){
-                  setKeyRepeat(config.a, is_pressed);
-              }
+              emitKey(config.a[config.a_current_key], is_pressed, config.a_modifier[config.a_current_key]);
+              if ((config.a_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.a[config.a_current_key]))){
+                  setKeyRepeat(config.a[config.a_current_key], is_pressed);
+              } else if ((config.a_cycle) && !(is_pressed)) {
+                  config.a_current_key++;
+                  if (config.a_current_key >= config.a_total_keys) {
+                      config.a_current_key = 0;
+                  }
+              } else if (config.a_total_keys < 1) {
+				  config.a_total_keys = 1;
+			  }
+
             }
             break;
 
           case SDL_CONTROLLER_BUTTON_B:
             if (state.hotkey_pressed) {
-              emitKey(config.b_hk, is_pressed, config.b_hk_modifier);
+              emitKey(config.b_hk[config.b_hk_current_key], is_pressed, config.b_hk_modifier[config.b_hk_current_key]);
               if (is_pressed) { //keep track of combo button press so it can be released if hotkey is released before this button is released
                 state.b_hk_was_pressed = true;
                 state.hotkey_combo_triggered = true;
               } else {
                 state.b_hk_was_pressed = false;
-              }
+			  }
             } else if (state.b_hk_was_pressed && !(is_pressed)) {
-              emitKey(config.b_hk, is_pressed, config.b_hk_modifier);              
+              emitKey(config.b_hk[config.b_hk_current_key], is_pressed, config.b_hk_modifier[config.b_hk_current_key]);              
               state.b_hk_was_pressed = false;
-            } else {
-              emitKey(config.b, is_pressed, config.b_modifier);
-              if ((config.b_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.b))){
-                  setKeyRepeat(config.b, is_pressed);
+              if (config.b_hk_cycle) {
+                  config.b_hk_current_key++;
+                  if (config.b_hk_current_key >= config.b_hk_total_keys) {
+                      config.b_hk_current_key = 0;
+                  }
+              } else {
+				config.b_hk_total_keys = 1;
               }
+            } else {
+              emitKey(config.b[config.b_current_key], is_pressed, config.b_modifier[config.b_current_key]);
+              if ((config.b_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.b[config.b_current_key]))){
+                  setKeyRepeat(config.b[config.b_current_key], is_pressed);
+              } else if ((config.b_cycle) && !(is_pressed)) {
+                  config.b_current_key++;
+                  if (config.b_current_key >= config.b_total_keys) {
+                      config.b_current_key = 0;
+                  }
+              } else if (config.b_total_keys < 1) {
+				  config.b_total_keys = 1;
+			  }
+
             }
             break;
 
           case SDL_CONTROLLER_BUTTON_X:
             if (state.hotkey_pressed) {
-              emitKey(config.x_hk, is_pressed, config.x_hk_modifier);
+              emitKey(config.x_hk[config.x_hk_current_key], is_pressed, config.x_hk_modifier[config.x_hk_current_key]);
               if (is_pressed) { //keep track of combo button press so it can be released if hotkey is released before this button is released
                 state.x_hk_was_pressed = true;
                 state.hotkey_combo_triggered = true;
@@ -1759,19 +1952,34 @@ bool handleEvent(const SDL_Event& event)
                 state.x_hk_was_pressed = false;
               }
             } else if (state.x_hk_was_pressed && !(is_pressed)) {
-              emitKey(config.x_hk, is_pressed, config.x_hk_modifier);              
+              emitKey(config.x_hk[config.x_hk_current_key], is_pressed, config.x_hk_modifier[config.x_hk_current_key]);              
               state.x_hk_was_pressed = false;
+              if (config.x_hk_cycle) {
+                  config.x_hk_current_key++;
+                  if (config.x_hk_current_key >= config.x_hk_total_keys) {
+                      config.x_hk_current_key = 0;
+                  }
+              } else {
+				  config.x_hk_total_keys = 1;
+			  }
             } else {
-              emitKey(config.x, is_pressed, config.x_modifier);
-              if ((config.x_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.x))){
-                  setKeyRepeat(config.x, is_pressed);
-              }
+              emitKey(config.x[config.x_current_key], is_pressed, config.x_modifier[config.x_current_key]);
+              if ((config.x_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.x[config.x_current_key]))){
+                  setKeyRepeat(config.x[config.x_current_key], is_pressed);
+              } else if ((config.x_cycle) && !(is_pressed)) {
+                  config.x_current_key++;
+                  if (config.x_current_key >= config.x_total_keys) {
+                      config.x_current_key = 0;
+                  }
+              } else if (config.x_total_keys < 1) {
+				  config.x_total_keys = 1;
+			  }
             }
             break;
 
           case SDL_CONTROLLER_BUTTON_Y:
             if (state.hotkey_pressed) {
-              emitKey(config.y_hk, is_pressed, config.y_hk_modifier);
+              emitKey(config.y_hk[config.y_hk_current_key], is_pressed, config.y_hk_modifier[config.y_hk_current_key]);
               if (is_pressed) { //keep track of combo button press so it can be released if hotkey is released before this button is released
                 state.y_hk_was_pressed = true;
                 state.hotkey_combo_triggered = true;
@@ -1779,19 +1987,34 @@ bool handleEvent(const SDL_Event& event)
                 state.y_hk_was_pressed = false;
               }
             } else if (state.y_hk_was_pressed && !(is_pressed)) {
-              emitKey(config.y_hk, is_pressed, config.y_hk_modifier);              
+              emitKey(config.y_hk[config.y_hk_current_key], is_pressed, config.y_hk_modifier[config.y_hk_current_key]);              
               state.y_hk_was_pressed = false;
+              if (config.y_hk_cycle) {
+                  config.y_hk_current_key++;
+                  if (config.y_hk_current_key >= config.y_hk_total_keys) {
+                      config.y_hk_current_key = 0;
+                  }
+              } else {
+				  config.y_hk_total_keys = 1;
+			  }
             } else {
-              emitKey(config.y, is_pressed, config.y_modifier);
-              if ((config.y_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.y))){
-                  setKeyRepeat(config.y, is_pressed);
-              }
+              emitKey(config.y[config.y_current_key], is_pressed, config.y_modifier[config.y_current_key]);
+              if ((config.y_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.y[config.y_current_key]))){
+                  setKeyRepeat(config.y[config.y_current_key], is_pressed);
+              } else if ((config.y_cycle) && !(is_pressed)) {
+                  config.y_current_key++;
+                  if (config.y_current_key >= config.y_total_keys) {
+                      config.y_current_key = 0;
+                  }
+              } else if (config.y_total_keys < 1) {
+				  config.y_total_keys = 1;
+			  }
             }
             break;
 
           case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:
             if (state.hotkey_pressed) {
-              emitKey(config.l1_hk, is_pressed, config.l1_hk_modifier);
+              emitKey(config.l1_hk[config.l1_hk_current_key], is_pressed, config.l1_hk_modifier[config.l1_hk_current_key]);
               if (is_pressed) { //keep track of combo button press so it can be released if hotkey is released before this button is released
                 state.l1_hk_was_pressed = true;
                 state.hotkey_combo_triggered = true;
@@ -1799,19 +2022,35 @@ bool handleEvent(const SDL_Event& event)
                 state.l1_hk_was_pressed = false;
               }
             } else if (state.l1_hk_was_pressed && !(is_pressed)) {
-              emitKey(config.l1_hk, is_pressed, config.l1_hk_modifier);              
+              emitKey(config.l1_hk[config.l1_hk_current_key], is_pressed, config.l1_hk_modifier[config.l1_hk_current_key]);              
               state.l1_hk_was_pressed = false;
+              if (config.l1_hk_cycle) {
+                  config.l1_hk_current_key++;
+                  if (config.l1_hk_current_key >= config.l1_hk_total_keys) {
+                      config.l1_hk_current_key = 0;
+                  }
+              } else {
+				  config.l1_hk_total_keys = 1;
+			  }
             } else {
-              emitKey(config.l1, is_pressed, config.l1_modifier);
-              if ((config.l1_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.l1))){
-                  setKeyRepeat(config.l1, is_pressed);
-              }
+              emitKey(config.l1[config.l1_current_key], is_pressed, config.l1_modifier[config.l1_current_key]);
+              if ((config.l1_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.l1[config.l1_current_key]))){
+                  setKeyRepeat(config.l1[config.l1_current_key], is_pressed);
+              } else if ((config.l1_cycle) && !(is_pressed)) {
+                  config.l1_current_key++;
+                  if (config.l1_current_key >= config.l1_total_keys) {
+                      config.l1_current_key = 0;
+                  }
+              } else if (config.l1_total_keys < 1) {
+				  config.l1_total_keys = 1;
+			  }
+
             }
             break;
 
           case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:
             if (state.hotkey_pressed) {
-              emitKey(config.r1_hk, is_pressed, config.r1_hk_modifier);
+              emitKey(config.r1_hk[config.r1_hk_current_key], is_pressed, config.r1_hk_modifier[config.r1_hk_current_key]);
               if (is_pressed) { //keep track of combo button press so it can be released if hotkey is released before this button is released
                 state.r1_hk_was_pressed = true;
                 state.hotkey_combo_triggered = true;
@@ -1819,13 +2058,28 @@ bool handleEvent(const SDL_Event& event)
                 state.r1_hk_was_pressed = false;
               }
             } else if (state.r1_hk_was_pressed && !(is_pressed)) {
-              emitKey(config.r1_hk, is_pressed, config.r1_hk_modifier);              
+              emitKey(config.r1_hk[config.r1_hk_current_key], is_pressed, config.r1_hk_modifier[config.r1_hk_current_key]);              
               state.r1_hk_was_pressed = false;
+              if (config.r1_hk_cycle) {
+                  config.r1_hk_current_key++;
+                  if (config.r1_hk_current_key >= config.r1_hk_total_keys) {
+                      config.r1_hk_current_key = 0;
+                  }
+              } else {
+				  config.r1_hk_total_keys = 1;
+			  }
             } else {
-              emitKey(config.r1, is_pressed, config.r1_modifier);
-              if ((config.r1_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.r1))){
-                  setKeyRepeat(config.r1, is_pressed);
-              }
+              emitKey(config.r1[config.r1_current_key], is_pressed, config.r1_modifier[config.r1_current_key]);
+              if ((config.r1_repeat && is_pressed && (state.key_to_repeat == 0)) || (!(is_pressed) && (state.key_to_repeat == config.r1[config.r1_current_key]))){
+                  setKeyRepeat(config.r1[config.r1_current_key], is_pressed);
+              } else if ((config.r1_cycle) && !(is_pressed)) {
+                  config.r1_current_key++;
+                  if (config.r1_current_key >= config.r1_total_keys) {
+                      config.r1_current_key = 0;
+                  }
+              } else if (config.r1_total_keys < 1) {
+				  config.r1_total_keys = 1;
+			  }
             }
             break;
 
