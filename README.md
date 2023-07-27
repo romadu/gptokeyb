@@ -4,7 +4,7 @@ Gamepad to Keyboard/mouse/xbox360(gamepad) emulator
 
 Based on code by: [Kris Henriksen](https://github.com/krishenriksen/AnberPorts/tree/master/AnberPorts-Joystick) and fake Xbox code from: https://github.com/Emanem/js2xbox   
 Modified to use SDL2 by: [Nikolai Wuttke](https://github.com/lethal-guitar) & [Shanti Gilbert](https://github.com/shantigilbert) for https://github.com/EmuELEC/EmuELEC
-Interactive text entry added by [Robin Duxfield](https://github.com/romadu)
+Interactive text entry modes, hotkey+button key assignment support, key repeat and cycling through key sets assigned to specified button(s) added by [Robin Duxfield](https://github.com/romadu)
 
 List of keycode values start here: https://github.com/romadu/gptokeyb/blob/7e73617324aa0b20c833a7ea417af3d9484d3b52/gptokeyb.cpp#L288
 
@@ -138,6 +138,21 @@ left_analog_left = repeat
 left_analog_right = right
 left_analog_right = repeat
 ```
+#### Cycle through a set of keys by pressing a single button
+Any and each of `A`, `B`, `X`, `Y`, `L1`, `R1` and `hotkey+A`, `hotkey+B`, `hotkey+X`, `hotkey+Y`, `hotkey+L1`, `hotkey+R1` can have up to 12 keys assigned to the button. Pressing the button will cycle through the set of keys assigned.
+
+Due to the way that hotkey presses are configured (to allow hotkey key combos for other functions), holding `hotkey` and pressing the relevant button without releasing `hotkey` will repeat a key within the set without progressing through the cycle. Releasing `hotkey` before releasing the relevant button will cycle to the next key in the set for the subsequent press of `hotkey` and the relevant button.
+
+The following example assigns `F1`, `F2` and `F3` to the `A` button and `A`, `F` and `space` to `hotkey+A`.
+```
+a = f1
+a = f2
+a = f3
+a_hk = a
+a_hk = f
+a_hk = space
+```
+
 ### Text Entry Options
 Text entry is possible, either by sending a preset (e.g. to enter your name to begin a game) or via an interactive input mode that's similar to entry of initials for a high score table 
 
