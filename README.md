@@ -139,7 +139,7 @@ left_analog_right = right
 left_analog_right = repeat
 ```
 #### Cycle through a set of keys by pressing a single button
-Any and each of `A`, `B`, `X`, `Y`, `L1`, `R1` and `hotkey+A`, `hotkey+B`, `hotkey+X`, `hotkey+Y`, `hotkey+L1`, `hotkey+R1` can have up to 12 keys assigned to the button. Pressing the button will cycle through the set of keys assigned.
+Any and each of `A`, `B`, `X`, `Y`, `L1`, `R1` and `hotkey+A`, `hotkey+B`, `hotkey+X`, `hotkey+Y`, `hotkey+L1`, `hotkey+R1` can have up to 12 keys assigned to the button. Pressing the button will cycle through the set of keys assigned. Key Modifiers can be assigned for each key.
 
 Due to the way that hotkey presses are configured (to allow hotkey key combos for other functions), holding `hotkey` and pressing the relevant button without releasing `hotkey` will repeat a key within the set without progressing through the cycle. Releasing `hotkey` before releasing the relevant button will cycle to the next key in the set for the subsequent press of `hotkey` and the relevant button.
 
