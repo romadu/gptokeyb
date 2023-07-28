@@ -825,17 +825,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.a_modifier[config.a_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.a_current_key++;
             config.a_total_keys++;
             if (config.a_total_keys > 1) {
                 config.a_cycle = true;
-				config.a_total_keys = std::min(config.a_total_keys,12);
-			}
-            if (config.a_current_key < config.a_total_keys) {
-				config.a[config.a_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("A button has too many key assignments\n");
-			}
+	    }
+            if (config.a_total_keys <= 12) {
+		config.a[config.a_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+		printf("A button has too many key assignments\n");
+	    }
+	    config.a_total_keys = std::min(config.a_total_keys,12);
         }
     } else if (strcmp(co.key, "a_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
@@ -845,17 +844,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.a_hk_modifier[config.a_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.a_hk_current_key++;
             config.a_hk_total_keys++;
             if (config.a_hk_total_keys > 1) {
                 config.a_hk_cycle = true;
-				config.a_hk_total_keys = std::min(config.a_hk_total_keys,12);
-			}
-            if (config.a_hk_current_key < config.a_hk_total_keys) {
-				config.a_hk[config.a_hk_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("A + hotkey button has too many key assignments\n");
-			}
+	    }
+            if (config.a_hk_total_keys <= 12) {
+		config.a_hk[config.a_hk_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+		printf("A + hotkey button has too many key assignments\n");
+	    }
+	    config.a_hk_total_keys = std::min(config.a_hk_total_keys,12);
         }
     } else if (strcmp(co.key, "b") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
@@ -867,17 +865,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.b_modifier[config.b_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.b_current_key++;
             config.b_total_keys++;
             if (config.b_total_keys > 1) {
                 config.b_cycle = true;
-				config.b_total_keys = std::min(config.b_total_keys,12);
-			}
-            if (config.b_current_key < config.b_total_keys) {
-				config.b[config.b_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("B button has too many key assignments\n");
-			}
+	    }
+            if (config.b_total_keys <= 12) {
+		config.b[config.b_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+		printf("B button has too many key assignments\n");
+	    }
+	    config.b_total_keys = std::min(config.b_total_keys,12);
         }
     } else if (strcmp(co.key, "b_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
@@ -887,17 +884,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.b_hk_modifier[config.b_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.b_hk_current_key++;
             config.b_hk_total_keys++;
             if (config.b_hk_total_keys > 1) {
                 config.b_hk_cycle = true;
-				config.b_hk_total_keys = std::min(config.b_hk_total_keys,12);
-			}
-            if (config.b_hk_current_key < config.b_hk_total_keys) {
-				config.b_hk[config.b_hk_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("B + hotkey button has too many key assignments\n");
-			}
+	    }
+            if (config.b_hk_total_keys <= 12) {
+		config.b_hk[config.b_hk_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+		printf("B + hotkey button has too many key assignments\n");
+	    }
+	    config.b_hk_total_keys = std::min(config.b_hk_total_keys,12);
         }
     } else if (strcmp(co.key, "x") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
@@ -909,17 +905,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.x_modifier[config.x_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.x_current_key++;
             config.x_total_keys++;
             if (config.x_total_keys > 1) {
                 config.x_cycle = true;
-				config.x_total_keys = std::min(config.x_total_keys,12);
             }
-            if (config.x_current_key < config.x_total_keys) {
-			    config.x[config.x_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("X button has too many key assignments\n");
-			}
+            if (config.x_total_keys <= 12) {
+		config.x[config.x_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+	    	printf("X button has too many key assignments\n");
+	    }
+	    config.x_total_keys = std::min(config.x_total_keys,12);
         }
     } else if (strcmp(co.key, "x_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
@@ -929,17 +924,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.x_hk_modifier[config.x_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.x_hk_current_key++;
             config.x_hk_total_keys++;
             if (config.x_hk_total_keys > 1) {
                 config.x_hk_cycle = true;
-				config.x_hk_total_keys = std::min(config.x_hk_total_keys,12);
-           }
-            if (config.x_hk_current_key < config.x_hk_total_keys) {
-				config.x_hk[config.x_hk_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("X + hotkey button has too many key assignments\n");
-			}
+            }
+            if (config.x_hk_total_keys <= 12) {
+	    	config.x_hk[config.x_hk_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+	    	printf("X + hotkey button has too many key assignments\n");
+	    }
+	    config.x_hk_total_keys = std::min(config.x_hk_total_keys,12);
         }
     } else if (strcmp(co.key, "y") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
@@ -951,17 +945,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.y_modifier[config.y_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.y_current_key++;
             config.y_total_keys++;
             if (config.y_total_keys > 1) {
                 config.y_cycle = true;
-				config.y_total_keys = std::min(config.y_total_keys,12);
             }
-            if (config.y_current_key < config.y_total_keys) {
-				config.y[config.y_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("Y button has too many key assignments\n");
-			}
+            if (config.y_total_keys <= 12) {
+	    	config.y[config.y_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+	    	printf("Y button has too many key assignments\n");
+	    }
+	    config.y_total_keys = std::min(config.y_total_keys,12);
         }
     } else if (strcmp(co.key, "y_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
@@ -971,17 +964,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.y_hk_modifier[config.y_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.y_hk_current_key++;
             config.y_hk_total_keys++;
             if (config.y_hk_total_keys > 1) {
                 config.y_hk_cycle = true;
-				config.y_hk_total_keys = std::min(config.y_hk_total_keys,12);
             }
-            if (config.y_hk_current_key < config.y_hk_total_keys) {
-				config.y_hk[config.y_hk_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("Y + hotkey button has too many key assignments\n");
-			}
+            if (config.y_hk_total_keys <= 12) {
+	    	config.y_hk[config.y_hk_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+	    	printf("Y + hotkey button has too many key assignments\n");
+	    }
+	    config.y_hk_total_keys = std::min(config.y_hk_total_keys,12);
         }
     } else if (strcmp(co.key, "l1") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
@@ -993,17 +985,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.l1_modifier[config.l1_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.l1_current_key++;
             config.l1_total_keys++;
             if (config.l1_total_keys > 1) {
                 config.l1_cycle = true;
-				config.l1_total_keys = std::min(config.l1_total_keys,12);
             }
-            if (config.l1_current_key < config.l1_total_keys) {
-				config.l1[config.l1_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("L1 button has too many key assignments\n");
-			}
+            if (config.l1_total_keys <= 12) {
+	    	config.l1[config.l1_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+	    	printf("L1 button has too many key assignments\n");
+	    }
+	    config.l1_total_keys = std::min(config.l1_total_keys,12);
         }
     } else if (strcmp(co.key, "l1_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
@@ -1013,17 +1004,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.l1_hk_modifier[config.l1_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.l1_hk_current_key++;
             config.l1_hk_total_keys++;
             if (config.l1_hk_total_keys > 1) {
                 config.l1_hk_cycle = true;
-				config.l1_hk_total_keys = std::min(config.l1_hk_total_keys,12);
             }
-            if (config.l1_hk_current_key < config.l1_hk_total_keys) {
-				config.l1_hk[config.l1_hk_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("L1 + hotkey button has too many key assignments\n");
-			}
+            if (config.l1_hk_total_keys <= 12) {
+		config.l1_hk[config.l1_hk_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+		printf("L1 + hotkey button has too many key assignments\n");
+	    }
+	    config.l1_hk_total_keys = std::min(config.l1_hk_total_keys,12);
         }
     } else if (strcmp(co.key, "l2") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
@@ -1069,17 +1059,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.r1_modifier[config.r1_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.r1_current_key++;
-            config.r1_total_keys++;
+           config.r1_total_keys++;
             if (config.r1_total_keys > 1) {
                 config.r1_cycle = true;
-				config.r1_total_keys = std::min(config.r1_total_keys,12);
             }
-            if (config.r1_current_key < config.r1_total_keys) {
-				config.r1[config.r1_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("R1 button has too many key assignments\n");
-			}
+            if (config.r1_total_keys <= 12) {
+		config.r1[config.r1_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+		printf("R1 button has too many key assignments\n");
+	    }
+	    config.r1_total_keys = std::min(config.r1_total_keys,12);
         }
     } else if (strcmp(co.key, "r1_hk") == 0) {
         if (strcmp(co.value, "add_alt") == 0) {
@@ -1089,17 +1078,16 @@ void readConfigFile(const char* config_file)
         } else if (strcmp(co.value, "add_shift") == 0) {
             config.r1_hk_modifier[config.r1_hk_current_key] = KEY_LEFTSHIFT;
         } else {
-            config.r1_hk_current_key++;
             config.r1_hk_total_keys++;
             if (config.r1_hk_total_keys > 1) {
                 config.r1_hk_cycle = true;
-				config.r1_hk_total_keys = std::min(config.r1_hk_total_keys,12);
             }
-            if (config.r1_hk_current_key < config.r1_hk_total_keys) {
-				config.r1_hk[config.r1_hk_current_key] = char_to_keycode(co.value);
-			} else {
-				printf("R1 + hotkey button has too many key assignments\n");
-			}
+            if (config.r1_hk_total_keys <= 12) {
+		config.r1_hk[config.r1_hk_total_keys - 1] = char_to_keycode(co.value);
+	    } else {
+		printf("R1 + hotkey button has too many key assignments\n");
+	    }
+	    config.r1_hk_total_keys = std::min(config.r1_hk_total_keys,12);
         }
     } else if (strcmp(co.key, "r2") == 0) {
         if (strcmp(co.value, "repeat") == 0) {
