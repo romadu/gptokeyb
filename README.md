@@ -4,6 +4,7 @@ Gamepad to Keyboard/mouse/xbox360(gamepad) emulator
 
 Based on code by: [Kris Henriksen](https://github.com/krishenriksen/AnberPorts/tree/master/AnberPorts-Joystick) and fake Xbox code from: https://github.com/Emanem/js2xbox   
 Modified to use SDL2 by: [Nikolai Wuttke](https://github.com/lethal-guitar) & [Shanti Gilbert](https://github.com/shantigilbert) for https://github.com/EmuELEC/EmuELEC
+
 Interactive text entry modes, hotkey+button key assignment support, key repeat and cycling through key sets assigned to specified button(s) added by [Robin Duxfield](https://github.com/romadu)
 
 List of keycode values start here: https://github.com/romadu/gptokeyb/blob/7e73617324aa0b20c833a7ea417af3d9484d3b52/gptokeyb.cpp#L288
