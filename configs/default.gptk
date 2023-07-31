@@ -23,8 +23,18 @@ right_analog_up = up
 right_analog_down = down
 right_analog_left = left
 right_analog_right = right
+
+deadzone_triggers = 3000
+
+# Old deadzone code
 deadzone_y = 2100
 deadzone_x = 1900
-deadzone_triggers = 3000
 mouse_scale = 512
 mouse_delay = 16
+
+# New deadzone code, this will overwrite the above deadzone code behaviour
+# Choices of: axial, radial, scaled_radial, sloped_axial, sloped_scaled_axial, hybrid
+deadzone_mode = scaled_radial
+deadzone = 1000
+deadzone_scale = 8
+deadzone_delay = 16
